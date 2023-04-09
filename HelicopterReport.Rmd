@@ -51,8 +51,9 @@ kable(vartable)
 
 # Screening Experiment
 
-To begin analyzing the six variables of interest, a fractional factorial design is used to screen our predictors.
+To begin analyzing the six variables of interest, a fractional factorial design is used to screen our predictors. To identify the key variables at play in lengthening paper helicopter flight time, a resolution VI factorial design is used, equating to 32 screening runs. 
 
+Within those screening runs, 32 helicopters were dropped from approximately 15 feet with variations in design specifications across each trial, and the time in air was recorded. From these results, a model was fitted including our six variables of interest, along with every 2-way interaction. To reduce this complex model, step-wise backwards selection was used to drop the least significant terms, and a summary of this model can be seen in the table below. As seen in this table, the most significant terms appear to be folded body and paper clips, with both having a negative effect on flight time. Many interaction terms (that include folded body and paper clips) being significant as well.
 
 ```{r}
 HeliDesign <- read.csv("fracfact.csv")
@@ -63,16 +64,26 @@ HeliDesign <- HeliDesign[1:32,]
 
 # main effects and all 2-way interactions
 HeliMod_2way <- lm(time ~(.)^2, data = HeliDesign)
-summary(HeliMod_2way)
+
 # looking for contributing effects
 #pid::paretoPlot(HeliMod_2way)
-# reduced model after stepwise backwards selection (alpha = 0.1)
+# reduced model after stepwise backwards selection (alpha = 0.1)**
 step <- stepAIC(HeliMod_2way, direction = "both", trace = FALSE)
 
 HeliMod_reduced <- step
+sumHeli <- summary(HeliMod_reduced)
+screeningtable <- as.data.frame(round(sumHeli$coefficients,3))
+names(screeningtable) <- c("Coefficient","Standard Error", "T-Test Stat", "P-value")
 
-pid::paretoPlot(HeliMod_reduced)
-#summary(HeliMod_reduced)
+screeningtable %>%
+  kbl(caption = "Reduced Fractional Factorial Model Results") %>%
+  kable_classic(full_width = F, html_font = "Cambria") 
+```
+
+The pareto plot below further emphasizes these effects, showcasing which variables (including interactions) have the greatest effect (both negative and positive) on flight time.
+
+```{r}
+paretoPlot(HeliMod_reduced)
 ```
 
 
@@ -140,6 +151,7 @@ steepest(model)
 
 ## Considerations
 
+- User error (timing, designing)
 
 # Technical Appendix  
 
