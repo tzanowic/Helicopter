@@ -45,7 +45,11 @@ There are a total of six explanatory variables of interest in predicting flight 
 ```{r}
 #variable table
 vartable = data.frame(Variable = c("Wing length","Body length","Body width","Paper clips","Folded wings","Folded body","Time"), Type = c("Explanatory","Explanatory","Explanatory","Explanatory","Explanatory","Explanatory", "Response"), Description = c("Length of wings (70mm or 120mm)", "Length of body (70mm or 120mm)", "Width of body (35mm or 50mm)", "No. of paper clips (0 or 2)", "Are wings folded (no or yes)", "Is the body folded (no or yes)", "Time in air (seconds)"))
-kable(vartable)    
+   
+
+vartable %>%
+  kbl(caption = "Variable Table") %>%
+  kable_classic(full_width = F, html_font = "Cambria") 
 ```
 
 
