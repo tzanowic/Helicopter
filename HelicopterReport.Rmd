@@ -18,6 +18,7 @@ library(mosaic)
 library(FrF2) # tools for design and analysis of fractional factorials
 library(pid)
 library(MASS)
+library(stats)
 library(rsm)
 library(kableExtra)
 ```
@@ -84,7 +85,7 @@ screeningtable %>%
   kable_classic(full_width = F, html_font = "Cambria") 
 ```
 
-The pareto plot below further emphasizes these effects, showcasing which variables (including interactions) have the greatest effect (both negative and positive) on flight time. In agreement with the model results above, having a folded body had the largest effect on flight time, as the presence of a folded body negatively effected time in the air. 
+The pareto plot below further emphasizes these effects, showcasing which variables (including interactions) have the greatest effect (both negative and positive) on flight time. In agreement with the model results above, having a folded body had the largest effect on flight time, as the presence of a folded body negatively effected time in the air. Following this, the interaction between body length and paper clips had the largest positive effect, as the inclusion of a longer body (120mm) and two paper clips generally led to longer flight time. However, paper clips on its own had a large negative impact on flight time, the third largest effect.
 
 ```{r}
 paretoPlot(HeliMod_reduced)
@@ -113,11 +114,11 @@ bb_design_1 <- bbd(
 names <-c("foldedbody","paperclips","winglength")
 
 designbb <- bb_design_1[,3:5]
-setnames(designbb,names)
+setNames(designbb,names)
 #fwrite(designbb,"~/Desktop/PSU/SeniorYear/Spring Semester/STAT470W/HeliFFD/BBDesign.csv")
 
 #response surface design
-HeliD <- read.csv("./HeliFFD/BBDesign.csv")
+HeliD <- read.csv("BBDesign.csv")
 model<-rsm(time~ FO(foldedbody,paperclips,winglength), data=HeliD) 
 summary(model)
 
