@@ -1,6 +1,6 @@
 ---
-title: "HelicopterReport"
-author: "Aureo Zanon,Tristan Zanowic"
+title: "Helicopter Optimization Report"
+author: "Aureo Zanon, Tristan Zanowic"
 date: "4/6/2023"
 output:
   pdf_document:
@@ -38,9 +38,9 @@ To determine the optimal paper helicopter specifications in lengthening flight t
 
 ## Variables
 
-There are a total of six explanatory variables of interest in predicting flight time, from cutting dimensions such as wing length to add-ons like paper clips. Each variable has two levels to be analyzed (listed in the description column of the table below).
+There are a total of six explanatory variables of interest in predicting flight time, from cutting dimensions such as wing length to add-ons like paper clips. Each variable has two levels to be analyzed (listed in the description column of the table).
 
-```{r}
+```{r Var}
 #variable table
 vartable = data.frame(Variable = c("Wing length","Body length","Body width","Paper clips","Folded wings","Folded body","Time"), Type = c("Explanatory","Explanatory","Explanatory","Explanatory","Explanatory","Explanatory", "Response"), Description = c("Length of wings (70mm or 120mm)", "Length of body (70mm or 120mm)", "Width of body (35mm or 50mm)", "No. of paper clips (0 or 2)", "Are wings folded (no or yes)", "Is the body folded (no or yes)", "Time in air (seconds)"))
    
@@ -57,7 +57,7 @@ To begin analyzing the six variables of interest, a fractional factorial design 
 
 From these results of these 32 runs, a model can be fitted including our six variables of interest, along with every 2-way interaction. To reduce this complex model, step-wise backwards selection was used to drop the least significant terms, and a summary of this model can be seen in the table below. As seen in this table, the most significant terms appear to be folded body and paper clips, with both having a negative effect on flight time. Many interaction terms (that include folded body and paper clips) being significant as well. Other variables of interest, such as body length, body width, and folded wings, appear to have negligible effects on their own (p-values > .6).
 
-```{r}
+```{r Screen}
 HeliDesign <- read.csv("fracfact.csv")
 #store then omit center points 
 CP <- HeliDesign[33:36,]
@@ -84,19 +84,24 @@ screeningtable %>%
 
 The pareto plot below further emphasizes these effects, showcasing which variables (including interactions) have the greatest effect (both negative and positive) on flight time. In agreement with the model results above, having a folded body had the largest effect on flight time, as the presence of a folded body negatively effected time in the air. Following this, the interaction between body length and paper clips had the largest positive effect, as the inclusion of a longer body (120mm) and two paper clips generally led to longer flight time. However, paper clips on its own had a large negative impact on flight time, the third largest effect.
 
-```{r}
+```{r Par}
 pareto <- paretoPlot(HeliMod_reduced)
 ```
 
+\newpage
 
-```{r}
+```{r Eff}
 # effect plots
-MEPlot(HeliMod_reduced) # main effects
+#MEPlot(HeliMod_reduced) # main effects
 ```
 
-The interaction plot demonstrates several instances of interactions, implying that the interactions do exist between the several different variables that were modified in the experiment. Due to this in order to ensure a design that includes the most important features the steepes sloped in the interaction lines were selected which in this case were observed for paperclips with folded body and foldedbody with winglength. In turn to optimize the design those three variables will be selected for the optimization run. When looking at the cube plot it is observed that a combination of +1 winglength with -1 paperclips has the largest value, while the folded body variable doesn't seem to result in very large change when at +1.
 
-```{r}
+
+The interaction plot demonstrates several instances of interactions, implying that the interactions do exist between the several different variables that were modified in the experiment. Due to this, in order to ensure a design that includes the most important features, the steepest slope in the interaction lines were selected, which was observed for paperclips with folded body and folded body with wing length. In turn, to optimize the design those three variables will be selected for the optimization run. When looking at the cube plot, it is observed that a combination of +1 wing length with -1 paperclips has the largest value, while the folded body variable doesn't seem to result in very large change when at +1.
+
+$$\\[.3in]$$
+
+```{r Plots}
 IAPlot(HeliMod_reduced) # interactions
 cubePlot(HeliMod_reduced, eff1 = "winglength", eff2 = "paperclips", 
          eff3 = "foldedbody",
@@ -107,11 +112,11 @@ cubePlot(HeliMod_reduced, eff1 = "winglength", eff2 = "paperclips",
 
 Upon analyzing the results of the screening process, we chose to further optimize the three most significant (not including interactions) explanatory variables: **folded body, paper clips, and wing length**. To do so, a box-behnken design is used for our response surface experiment, equating to 16 optimization runs. 
 
-The Box-Behnken design specifically aims to avoid treatment combinations which could be seen as extreme, avoiding the corner and star points typically observed in other designs. The Box-Behnke design also allows for the implementation of a quadractic model which could better explain the observed variability in the helicopter flight times.
+The Box-Behnken design specifically aims to avoid treatment combinations which could be seen as extreme, avoiding the corner and star points typically observed in other designs. The Box-Behnken design also allows for the implementation of a quadratic model, which could better explain the observed variability in the helicopter flight times.
 
-Following measuring the time of these 16 helicopters, we can fit a model to describe the effects of the three variables of interest, their interaction and second order terms. Most significantly (p-value < .001), paper clips appeared to have the largest effect on flight time, as the inclusion of paper clips leads to about a two second drop in paper helicopter flight time (since no paper clips is coded as -1), after accounting for folded body and wing length. However the 2nd order term for paperclips is equal to the threshold of .05 which could imply some moderate significance, although not dramatic. While wing length,wing length squared and folded body factors were significant under a p-value threshold of .05, their interactions can still be noted as not significant they did not fall from this mark. Specifically, the inclusion of a folded body leads to an approximate .314 second decrease in flight time, while longer wings contributes to a .309 second increase in time (as compared to a neutral wing length). 
+Following measuring the time of these 16 helicopters, we can fit a model to describe the effects of the three variables of interest, their interaction and second order terms. Most significantly (p-value < .001), paper clips appeared to have the largest effect on flight time, as the inclusion of paper clips leads to about a two second drop in paper helicopter flight time (since no paper clips is coded as -1), after accounting for folded body and wing length. However, the 2nd order term for paperclips is equal to the threshold of .05, which could imply some moderate significance, although not dramatic. While wing length, wing length squared and folded body factors were significant under a p-value threshold of .05, their interactions can still be noted as not significant they did not fall from this mark. Specifically, the inclusion of a folded body leads to an approximate .628 second decrease in flight time, while longer wings contributes to a .347 second increase in time (as compared to a neutral wing length). 
 
-```{r}
+```{r BB}
 ##boxbehnken design
 bb_design_1 <- bbd(
   k  = 3,            # Number of factors,
@@ -140,9 +145,11 @@ BBtable %>%
 ```
 
 
-Following analysis of the model we fit for our response surface experiment, contour plots reveal how each of our three variables interacts with each other to maximize flight time. To begin, in the first contour plot with paper clips and folded body, flight time is maximized (highest point on the linear plane) when the helicopter body is not folded and paper clips are not included. From the other two plots, the results from our model are upheld, showing that the optimal helicopter design has shorter wings, no paper clips, and folded body. 
+Following analysis of the model we fit for our response surface experiment, contour plots reveal how each of our three variables interacts with each other to maximize flight time. To begin, in the first contour plot with paper clips and folded body, flight time is maximized (highest point on the plane) when the helicopter body is not folded and paper clips are not included. From the other two plots, the results from our model are upheld, showing that the optimal helicopter design has shorter wings, no paper clips, and folded body. 
 
-```{r}
+$$\\[.3in]$$
+
+```{r Cont, warning=FALSE}
 # countour plots
 par(mfrow=c(2,3))
 contour(model,~foldedbody+paperclips+winglength, 
@@ -162,7 +169,7 @@ persp(model, ~ winglength + paperclips, image = TRUE,
 
 From the generated response surface designs, the optimal helicopter can be estimated. The optimal helicopter is found to have a folded body value at ~.77, wing length at ~-.55 and paper clips at ~-1.33. The optimal response surface design falls slightly outside the scope of the ranges of the variable, however optimal helicopters can be designed for the confirmation run.  
 
-```{r, eval=FALSE}
+```{r Opt, eval=FALSE}
 #optimal design for longest time in the air
 opt_point <- summary(model)$canonical$xs
 opt_point <- t(as.data.frame(opt_point))
@@ -180,11 +187,11 @@ opt_point %>%
 ```
 
 # Confirmation Run 
-To confirm that the afformentioned design is truly the optimal design for the longest flight time for a paper helicopter, 5 additional helicopters were dropped to see the flight time comparison to the prediction of the best response. The only differences in the design was when looking at the optimal number of paper clips were you could not go beyond no paper clips at -1, and the folded body was rounded to 1 since it acted as an indicator. The winglength was set to 82.5 mm as it is the point between -1 (70 mm) and 0(95 mm).
+To confirm that the aforementioned design is truly the optimal design for the longest flight time for a paper helicopter, 5 additional helicopters were dropped to see the flight time comparison to the prediction of the best response. The only differences in the design come when looking at the optimal number of paper clips, as you cannot go beyond zero paper clips at -1. Similarly, the folded body was rounded to 1 since it acted as an indicator. The wing length was set to 82.5 mm as it is the point between -1 (70 mm) and 0 (95 mm).
 
-The confirmation run demonstrated that the helicopters on average the time that the helicopter flew was 5.044 which is close to the predicted value from the response surface design model.
+The confirmation runs show the helicopters flew 5.044 seconds on average, which is close to the predicted value from the response surface design model.
 
-```{r}
+```{r Confirm}
 ConfRun <- read.csv("ConfirmationRuns.csv")
 cap <- paste("Average = ",mean(ConfRun$time))
 
@@ -205,7 +212,7 @@ ConfRun %>%
 ## Considerations
 From the single optimization run that was performed the total helicopters utilized is equal to 53. This amount is slightly below the limit of 60 which means that there are a small amount of resources left to attempt a further optimization.
 
-One aspect to consider from the optimization design is the fact that there was some extrapolation in looking at the paperclips variable in which it can be observed. The optimal amount of paperclips is found to be at -1.33 which is implausible for the design at hand. However, this could mean that the mass of a helicopter could be more readily considered meaning that removing the equivalent of .33 mass of a paperclip could give the truest optimal design. In a similar fashion, the folding predicted by the optimal design could further imply that a proper angle of the folding may result in a more optimized design. 
+One aspect to consider from the optimization design is the fact that there was some extrapolation in looking at the paperclips variable in which it can be observed. The optimal amount of paper clips is found to be coded at -1.33, which is implausible for the design at hand. However, this could mean that the mass of a helicopter could be more readily considered, meaning that removing the equivalent of .33 mass of a paperclip could give the truest optimal design. In a similar fashion, the folding predicted by the optimal design could further imply that a proper angle of the folding may result in a more optimized design. 
 
 
 ## Limitations
@@ -216,6 +223,112 @@ While the results of this study can likely be generalized to a classroom setting
 # Technical Appendix  
 
 ### R Script
-```{r r showcode, ref.label=all_labels(), echo=TRUE, eval=FALSE}
+```{r r showcode, echo=TRUE, eval=FALSE}
 # Reprinted code chunks used previously for analysis
+
+#variable table
+vartable = data.frame(Variable = c("Wing length","Body length","Body width","Paper clips","Folded wings","Folded body","Time"), Type = c("Explanatory","Explanatory","Explanatory","Explanatory","Explanatory","Explanatory", "Response"), Description = c("Length of wings (70mm or 120mm)", "Length of body (70mm or 120mm)", "Width of body (35mm or 50mm)", "No. of paper clips (0 or 2)", "Are wings folded (no or yes)", "Is the body folded (no or yes)", "Time in air (seconds)"))
+   
+
+vartable %>%
+  kbl(caption = "Variable Table") %>%
+  kable_classic(full_width = F, html_font = "Cambria") 
+
+HeliDesign <- read.csv("fracfact.csv")
+#store then omit center points 
+CP <- HeliDesign[33:36,]
+HeliDesign <- HeliDesign[1:32,]
+
+
+# main effects and all 2-way interactions
+HeliMod_2way <- lm(time ~(.)^2, data = HeliDesign)
+
+# looking for contributing effects
+#pid::paretoPlot(HeliMod_2way)
+# reduced model after stepwise backwards selection (alpha = 0.1)**
+step <- stepAIC(HeliMod_2way, direction = "both", trace = FALSE)
+
+HeliMod_reduced <- step
+sumHeli <- summary(HeliMod_reduced)
+screeningtable <- as.data.frame(round(sumHeli$coefficients,3))
+names(screeningtable) <- c("Coefficient","Standard Error", "T-Test Stat", "P-value")
+
+screeningtable %>%
+  kbl(caption = "Reduced Fractional Factorial Model Results") %>%
+  kable_classic(full_width = F, html_font = "Cambria") 
+
+#Pareto
+pareto <- paretoPlot(HeliMod_reduced)
+
+# effect plots
+MEPlot(HeliMod_reduced) # main effects
+IAPlot(HeliMod_reduced) # interactions
+cubePlot(HeliMod_reduced, eff1 = "winglength", eff2 = "paperclips", 
+         eff3 = "foldedbody",
+         main = "Cube Plot for Distance to Optimal Helicopter")
+
+##boxbehnken design
+bb_design_1 <- bbd(
+  k  = 3,            # Number of factors,
+  n0 = 4,            # Number of center points,
+  block = FALSE,     # Consider blocks or not in the design 
+  randomize = FALSE)
+
+names <-c("foldedbody","paperclips","winglength")
+
+designbb <- bb_design_1[,3:5]
+#setNames(designbb,names)
+#fwrite(designbb,"~/Desktop/PSU/SeniorYear/Spring Semester/STAT470W/HeliFFD/BBDesign.csv")
+
+#response surface design
+HeliD <- read.csv("BBDesign.csv")
+model<-rsm(time~ FO(foldedbody,paperclips,winglength)+TWI(foldedbody,paperclips,winglength)+SO(foldedbody,paperclips,winglength), data=HeliD) 
+
+
+sumBBHeli <- summary(model)
+BBtable <- as.data.frame(round(sumBBHeli$coefficients,3))
+names(BBtable) <- c("Coefficient","Standard Error", "T-Test Stat", "P-value")
+
+BBtable %>%
+  kbl(caption = "Box Behnken Optimization Model Results") %>%
+  kable_classic(full_width = F, html_font = "Cambria") 
+
+# countour plots
+par(mfrow=c(2,3))
+contour(model,~foldedbody+paperclips+winglength, 
+       image=TRUE, at=summary(model$canonical$xs))
+
+persp(model, ~ foldedbody + paperclips, image = TRUE,
+      at = c(summary(model)$canonical$xs, Block="B2"),
+      theta=30,zlab="Time",col.lab=33,contour="colors")
+persp(model, ~ winglength + foldedbody, image = TRUE,
+      at = c(summary(model)$canonical$xs, Block="B2"),
+      theta=30,zlab="Time",col.lab=33,contour="colors")
+persp(model, ~ winglength + paperclips, image = TRUE,
+      at = c(summary(model)$canonical$xs, Block="B2"),
+      theta=30,zlab="Time",col.lab=33,contour="colors")
+
+#optimal design for longest time in the air
+opt_point <- summary(model)$canonical$xs
+opt_point <- t(as.data.frame(opt_point))
+opt_point<-as_data_frame(opt_point)
+
+best_response <- predict(
+  model,             # Our model
+  opt_point             # Data frame with points to be predicted 
+  )
+opt_point$best_response_prediction<-best_response
+
+opt_point %>%
+  kbl(caption = "Optimal Helicopter Design to Maximize Time in Air") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+#Confirmation runs
+ConfRun <- read.csv("ConfirmationRuns.csv")
+cap <- paste("Average = ",mean(ConfRun$time))
+
+ConfRun %>%
+  kbl(caption = "Confirmation Runs for Optimal Design") %>%
+  kable_classic(full_width = F, html_font = "Cambria") %>%
+  add_footnote(cap,notation = "none")
 ```
