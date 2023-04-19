@@ -28,6 +28,9 @@ library(kableExtra)
 
 Paper helicopters are a fun, creative way for child care programs to get children engaged with curiosity and building. Built using a single sheet of paper and other common supplies, these helicopters are designed in a near infinite number of ways in an attempt to gain the most air time. 
 
+![Paper Helicopter design](PaperHelicop.png)
+
+
 To determine the optimal paper helicopter specifications in lengthening flight time, a fractional factorial design is conducted along with a response surface experiment in this research. The goal is to analyze the effects of several variables within the helicopter’s design to discover what factors lead to the longest flight time, while maintaining a budget of 60 helicopters. With this study, the results can hopefully help children build the best helicopter to stay in the air, keeping them intrigued and curious throughout their learning. 
 
 ## Research Questions
@@ -46,7 +49,7 @@ vartable = data.frame(Variable = c("Wing length","Body length","Body width","Pap
    
 
 vartable %>%
-  kbl(caption = "Variable Table") %>%
+  kbl(caption = "Table 1: Variable") %>%
   kable_classic(full_width = F, html_font = "Cambria") 
 ```
 
@@ -78,7 +81,7 @@ screeningtable <- as.data.frame(round(sumHeli$coefficients,3))
 names(screeningtable) <- c("Coefficient","Standard Error", "T-Test Stat", "P-value")
 
 screeningtable %>%
-  kbl(caption = "Reduced Fractional Factorial Model Results") %>%
+  kbl(caption = "Table 2: Reduced Fractional Factorial Model Results") %>%
   kable_classic(full_width = F, html_font = "Cambria") 
 ```
 
@@ -105,7 +108,7 @@ $$\\[.3in]$$
 IAPlot(HeliMod_reduced) # interactions
 cubePlot(HeliMod_reduced, eff1 = "winglength", eff2 = "paperclips", 
          eff3 = "foldedbody",
-         main = "Cube Plot for Distance to Optimal Helicopter")
+         main = "Table 5: Cube Plot for Distance to Optimal Helicopter")
 ```
 
 # Response Surface Experiment
@@ -140,7 +143,7 @@ BBtable <- as.data.frame(round(sumBBHeli$coefficients,3))
 names(BBtable) <- c("Coefficient","Standard Error", "T-Test Stat", "P-value")
 
 BBtable %>%
-  kbl(caption = "Box Behnken Optimization Model Results") %>%
+  kbl(caption = "Table 6: Box Behnken Optimization Model Results") %>%
   kable_classic(full_width = F, html_font = "Cambria") 
 ```
 
@@ -154,7 +157,6 @@ $$\\[.3in]$$
 par(mfrow=c(2,3))
 contour(model,~foldedbody+paperclips+winglength, 
        image=TRUE, at=summary(model$canonical$xs))
-
 persp(model, ~ foldedbody + paperclips, image = TRUE,
       at = c(summary(model)$canonical$xs, Block="B2"),
       theta=30,zlab="Time",col.lab=33,contour="colors")
@@ -164,10 +166,10 @@ persp(model, ~ winglength + foldedbody, image = TRUE,
 persp(model, ~ winglength + paperclips, image = TRUE,
       at = c(summary(model)$canonical$xs, Block="B2"),
       theta=30,zlab="Time",col.lab=33,contour="colors")
-
+mtext("Table 7: Contour Plots for Interactions", side = 3, line = -1.2, outer = TRUE)
 ```
 
-From the generated response surface designs, the optimal helicopter can be estimated. The optimal helicopter is found to have a folded body value at ~.77, wing length at ~-.55 and paper clips at ~-1.33. The optimal response surface design falls slightly outside the scope of the ranges of the variable, however optimal helicopters can be designed for the confirmation run.  
+From the generated response surface designs, the optimal helicopter can be estimated. The optimal helicopter is found to have a folded body value at ~.77, wing length at ~-.55, and paper clips at ~-1.33. The optimal response surface design falls slightly outside the scope of the ranges of the variable, however optimal helicopters can be designed for the confirmation run.  
 
 ```{r Opt, eval=FALSE}
 #optimal design for longest time in the air
@@ -196,7 +198,7 @@ ConfRun <- read.csv("ConfirmationRuns.csv")
 cap <- paste("Average = ",mean(ConfRun$time))
 
 ConfRun %>%
-  kbl(caption = "Confirmation Runs for Optimal Design") %>%
+  kbl(caption = "Table 8: Confirmation Runs for Optimal Design") %>%
   kable_classic(full_width = F, html_font = "Cambria") %>%
   add_footnote(cap,notation = "none")
 ```
